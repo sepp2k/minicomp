@@ -1,0 +1,97 @@
+precedence:
+  compile:
+    source: |
+      xyz = 23;
+      print xyz + 7 * +13 % 11 - -48 / 3;
+  run:
+    stdout: |
+      42
+associativity:
+  compile:
+    source: |
+      print 78 - 23 - 13;
+  run:
+    stdout: |
+      42
+IO:
+  compile:
+    source: |
+      read x;
+      read y;
+      print x+y;
+      print x*y;
+  run:
+    - input: |
+        23
+        42
+      stdout: |
+        65
+        966
+    - input: |
+        1
+        2
+      stdout: |
+        3
+        2
+comparisons:
+  compile:
+    source: |
+      read x;
+      read y;
+      print x==y;
+      print !(x==y);
+      print x!=y;
+      print x>y;
+      print x>=y;
+      print x<y;
+      print x<=y;
+  run:
+    - input: |
+        1
+        1
+      stdout: |
+        1
+        0
+        0
+        0
+        1
+        0
+        1
+    - input: |
+        1
+        2
+      stdout: |
+        0
+        1
+        1
+        0
+        0
+        1
+        1
+    - input: |
+        2
+        1
+      stdout: |
+        0
+        1
+        1
+        1
+        1
+        0
+        0
+syntax-error:
+  compile:
+    source: |
+      print 12+
+    diagnostics: |
+      line 2:0 mismatched input '<EOF>' expecting {'(', '+', '-', '!', ID, INT}
+    exit_status: :failure
+undefined-variable:
+  compile:
+    source: |
+      read x;
+      print x;
+      print y;
+    diagnostics: |
+      line 3:6 Undefined variable: y
+    exit_status: :failure

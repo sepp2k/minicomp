@@ -1,0 +1,89 @@
+if-then-else:
+  compile:
+    source: |
+      read x;
+      if x % 2 == 0 then
+        print x+1;
+      else
+        print x-1;
+      end
+  run:
+    - input: |
+        43
+      stdout: |
+        42
+    - input: |
+        22
+      stdout: |
+        23
+if-then-without-else:
+  compile:
+    source: |
+      read x;
+      if x % 2 != 0 then
+        print x+1;
+      end
+  run:
+    - input: |
+        41
+      stdout: |
+        42
+    - input: |
+        22
+      stdout: ""
+fac:
+  compile:
+    source: |
+      read n;
+      fac = 1;
+      for i = 1 to n do
+        fac = fac * i;
+      end
+      print fac;
+  run:
+    - input: |
+        0
+      stdout: |
+        1
+    - input: |
+        5
+      stdout: |
+        120
+fib:
+  compile:
+    source: |
+      read max;
+      if max >= 0 then
+        print 0;
+      end
+      prev = 0;
+      cur = 1;
+      while cur <= max do
+        print cur;
+        tmp = prev;
+        prev = cur;
+        cur = cur + tmp;
+      end
+  run:
+    - input: |
+        -1
+      stdout: ""
+    - input: |
+        0
+      stdout: |
+        0
+    - input: |
+        1
+      stdout: |
+        0
+        1
+        1
+    - input: |
+        5
+      stdout: |
+        0
+        1
+        1
+        2
+        3
+        5
