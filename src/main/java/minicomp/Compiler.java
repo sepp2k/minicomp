@@ -178,7 +178,8 @@ public class Compiler extends MiniLangBaseVisitor<String> {
     @Override
     public String visitComparison(ComparisonContext exp) {
         String register = "%" + makeId();
-        emit(register + " = zext i1 " + binOp(exp.op, exp.lhs, exp.rhs) + " to i32");
+        String boolResult = binOp(exp.op, exp.lhs, exp.rhs);
+        emit(register + " = zext i1 " + boolResult + " to i32");
         return register;
     }
 
@@ -194,7 +195,7 @@ public class Compiler extends MiniLangBaseVisitor<String> {
         return null;
     }
 
-    private String translateCondition(ExpContext condition) {
+    private String visitCondition(ExpContext condition) {
         String conditionReg = visit(condition);
         String conditionAsBool = "%" + makeId();
         emit(conditionAsBool + " = icmp ne i32 0, " + conditionReg);
@@ -207,7 +208,8 @@ public class Compiler extends MiniLangBaseVisitor<String> {
         String thenLabel = makeId();
         String endLabel = makeId();
         String elseLabel = hasElse ? makeId() : endLabel;
-        emit("br i1 " + translateCondition(ifStatement.cond) + ", label %" + thenLabel + ", label %" + elseLabel);
+        String cond = visitCondition(ifStatement.cond);
+        emit("br i1 " + cond + ", label %" + thenLabel + ", label %" + elseLabel);
         emitLabel(thenLabel);
         for(StatContext stat: ifStatement.thenCase) {
             visit(stat);
@@ -231,7 +233,8 @@ public class Compiler extends MiniLangBaseVisitor<String> {
         String endLabel = makeId();
         emit("br label %" + condLabel);
         emitLabel(condLabel);
-        emit("br i1 " + translateCondition(loop.cond) + ", label %" + bodyLabel + ", label %" + endLabel);
+        String cond = visitCondition(loop.cond);
+        emit("br i1 " + cond + ", label %" + bodyLabel + ", label %" + endLabel);
         emitLabel(bodyLabel);
         for(StatContext stat: loop.body) {
             visit(stat);
@@ -267,5 +270,39 @@ public class Compiler extends MiniLangBaseVisitor<String> {
         emit("br label %" + condLabel);
         emitLabel(endLabel);
         return null;
+    }
+
+    private String visitLogicalExpression(ExpContext lhs, ExpContext rhs, boolean and) {
+        String lhsReg = visit(lhs);
+        String resultMem = "%" + makeId();
+        emit(resultMem + " = alloca i32");
+        emit("store i32 " + lhsReg + ", i32* " + resultMem);
+        String lhsAsBool = "%" + makeId();
+        emit(lhsAsBool + " = icmp ne i32 0, " + lhsReg);
+        String rhsLabel = makeId();
+        String endLabel = makeId();
+        if(and) {
+            emit("br i1 " + lhsAsBool + ", label %" + rhsLabel + ", label %" + endLabel);
+        } else {
+            emit("br i1 " + lhsAsBool + ", label %" + endLabel + ", label %" + rhsLabel);
+        }
+        emitLabel(rhsLabel);
+        String rhsReg = visit(rhs);
+        emit("store i32 " + rhsReg + ", i32* " + resultMem);
+        emit("br label %" + endLabel);
+        emitLabel(endLabel);
+        String resultReg = "%" + makeId();
+        emit(resultReg + " = load i32, i32* " + resultMem);
+        return resultReg;
+    }
+
+    @Override
+    public String visitAndExpression(AndExpressionContext exp) {
+        return visitLogicalExpression(exp.lhs, exp.rhs, true);
+    }
+
+    @Override
+    public String visitOrExpression(OrExpressionContext exp) {
+        return visitLogicalExpression(exp.lhs, exp.rhs, false);
     }
 }

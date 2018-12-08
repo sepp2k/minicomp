@@ -20,7 +20,7 @@ if-then-without-else:
   compile:
     source: |
       read x;
-      if x % 2 != 0 then
+      if x % 2 != 0 && x >= 0 || x == -13 then
         print x+1;
       end
   run:
@@ -31,6 +31,13 @@ if-then-without-else:
     - input: |
         22
       stdout: ""
+    - input: |
+        -23
+      stdout: ""
+    - input: |
+        -13
+      stdout: |
+        -12
 fac:
   compile:
     source: |
