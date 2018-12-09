@@ -119,15 +119,15 @@ public class LlvmCompiler extends Compiler.Base<String> {
             return operand;
         } else {
             String register = "%" + makeId();
-            String opCode;
             if (operator.equals("-")) {
-                opCode = "sub i32 0,";
+                emit(register + " = sub i32 0, " + operand);
             } else if (operator.equals("!")) {
-                opCode = "xor i32 1,";
+                String boolReg = "%" + makeId();
+                emit(boolReg + " = icmp eq i32 0, " + operand);
+                emit(register + " = zext i1 " + boolReg + " to i32");
             } else {
                 throw new IllegalStateException("Unknown unary operator");
             }
-            emit(register + " = " + opCode + " " + operand);
             return register;
         }
     }

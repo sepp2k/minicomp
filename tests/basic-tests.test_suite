@@ -14,6 +14,17 @@ associativity:
   run:
     stdout: |
       42
+negation:
+  compile:
+    source: |
+      print !0;
+      print !1;
+      print !2;
+  run:
+    stdout: |
+      1
+      0
+      0
 IO:
   compile:
     source: |
