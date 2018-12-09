@@ -2,6 +2,7 @@ precedence:
   compile:
     source: |
       xyz = 23;
+      # Tèst cömm€nt
       print xyz + 7 * +13 % 11 - -48 / 3;
   run:
     stdout: |
