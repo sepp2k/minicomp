@@ -16,7 +16,7 @@ public class Main {
                 System.exit(1);
                 return;
             }
-            Compiler compiler = new Compiler();
+            Compiler compiler = new LlvmCompiler();
             compiler.compile(input);
             if (compiler.hasErrors()) {
                 for (String error: compiler.getErrors()) {
@@ -24,7 +24,7 @@ public class Main {
                 }
                 System.exit(2);
             } else {
-                System.out.println(compiler.getLLVM());
+                System.out.write(compiler.getGeneratedCode());
             }
         } catch(IOException e) {
             e.printStackTrace();
