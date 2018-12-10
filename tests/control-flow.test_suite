@@ -122,3 +122,39 @@ fib:
         2
         3
         5
+step:
+  compile:
+    source: |
+      for i = 1 to 10 by 2 do
+        print i;
+      end
+    run:
+      stdout: |
+        1
+        3
+        5
+        7
+        9
+changing-the-loop-variable:
+  compile:
+    source: |
+      for i = 10 to 15 do
+        print i;
+        # Skip 13
+        if i == 12 then i = i + 1; end
+      end
+    run:
+      stdout: |
+        10
+        11
+        12
+        14
+        15
+empty-loop:
+  compile:
+    source: |
+      for i = 1 to 0 do
+        print i;
+      end
+    run:
+      stdout: ""

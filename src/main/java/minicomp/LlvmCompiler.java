@@ -15,6 +15,14 @@ public class LlvmCompiler extends Compiler.Base<String> {
         "  ret i32 0\n" +
         "}\n";
 
+    private int idCounter = 0;
+
+    private String makeId() {
+        // All generated IDs contain a dollar sign, so that they can't conflict with variable
+        // names (which can't contain dollar signs)
+        return "$" + idCounter++;
+    }
+
     private StringBuilder llvm = new StringBuilder();
 
     @Override

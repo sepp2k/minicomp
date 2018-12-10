@@ -13,14 +13,6 @@ public interface Compiler {
     public void compile(CharStream input);
 
     public static abstract class Base<T> extends MiniLangBaseVisitor<T> implements Compiler {
-        private int idCounter = 0;
-
-        protected String makeId() {
-            // All generated IDs contain a dollar sign, so that they can't conflict with variable
-            // names (which can't contain dollar signs)
-            return "$" + idCounter++;
-        }
-
         private List<String> errors = new ArrayList<String>();
 
         protected void error(int line, int column, String message) {
@@ -51,7 +43,7 @@ public interface Compiler {
                 public void enterAssignment(AssignmentContext assignment) {
                     addVariable(assignment.ID().getText());
                 }
-    
+
                 @Override
                 public void enterForLoop(ForLoopContext loop) {
                     addVariable(loop.ID().getText());
