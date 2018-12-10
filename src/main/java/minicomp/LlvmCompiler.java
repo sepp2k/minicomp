@@ -153,9 +153,13 @@ public class LlvmCompiler extends Compiler.Base<String> {
     }
 
     @Override
-    public String visitReadStatement(ReadStatementContext stat) {
-        emit("call i32 (i8*, ...) @scanf(i8* getelementptr inbounds ([3 x i8], [3 x i8]* @in_fmt, i32 0, i32 0), i32* %" + stat.ID().getText()  + ")");
-        return null;
+    public String visitReadExpression(ReadExpressionContext stat) {
+        String tempVar = "%" + makeId();
+        emit(tempVar + " = alloca i32");
+        emit("call i32 (i8*, ...) @scanf(i8* getelementptr inbounds ([3 x i8], [3 x i8]* @in_fmt, i32 0, i32 0), i32* " + tempVar  + ")");
+        String result = "%" + makeId();
+        emit(result + " = load i32, i32* "+ tempVar);
+        return result;
     }
 
     private String visitCondition(ExpContext condition) {

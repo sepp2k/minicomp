@@ -45,15 +45,11 @@ public interface Compiler {
                 }
             });
             ProgContext prog = parser.prog();
+            if (hasErrors()) return; // Don't try to generate code when there were syntax errors
             ParseTreeWalker.DEFAULT.walk(new MiniLangBaseListener() {
                 @Override
                 public void enterAssignment(AssignmentContext assignment) {
                     addVariable(assignment.ID().getText());
-                }
-    
-                @Override
-                public void enterReadStatement(ReadStatementContext read) {
-                    addVariable(read.ID().getText());
                 }
     
                 @Override

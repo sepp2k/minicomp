@@ -1,7 +1,7 @@
 if-then-else:
   compile:
     source: |
-      read x;
+      x = read;
       if x % 2 == 0 then
         print x+1;
       else
@@ -19,7 +19,7 @@ if-then-else:
 if-then-without-else:
   compile:
     source: |
-      read x;
+      x = read;
       if x % 2 != 0 && x >= 0 || x == -13 then
         print x+1;
       end
@@ -38,10 +38,38 @@ if-then-without-else:
         -13
       stdout: |
         -12
+short-circuiting:
+  compile:
+    source: |
+      if read || read then
+        print read;
+      end
+      if !(read && read) then
+        print read;
+      end
+    run:
+      - input: |
+          1
+          2
+          0
+          4
+        stdout: |
+          2
+          4
+      - input: |
+          0
+          1
+          2
+          3
+          0
+          5
+        stdout: |
+          2
+          5
 fac:
   compile:
     source: |
-      read n;
+      n = read;
       fac = 1;
       for i = 1 to n do
         fac = fac * i;
@@ -59,7 +87,7 @@ fac:
 fib:
   compile:
     source: |
-      read max;
+      max = read;
       if max >= 0 then
         print 0;
       end

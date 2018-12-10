@@ -28,8 +28,8 @@ negation:
 IO:
   compile:
     source: |
-      read x;
-      read y;
+      x = read;
+      y = read;
       print x+y;
       print x*y;
   run:
@@ -45,11 +45,26 @@ IO:
       stdout: |
         3
         2
+ReadOrder:
+  compile:
+    source: |
+      print read - read;
+  run:
+    - input: |
+        1
+        2
+      stdout: |
+        -1
+    - input: |
+        2
+        1
+      stdout: |
+        1
 comparisons:
   compile:
     source: |
-      read x;
-      read y;
+      x = read;
+      y = read;
       print x==y;
       print !(x==y);
       print x!=y;
@@ -96,12 +111,12 @@ syntax-error:
     source: |
       print 12+
     diagnostics: |
-      line 2:0 mismatched input '<EOF>' expecting {'(', '+', '-', '!', ID, INT}
+      line 2:0 mismatched input '<EOF>' expecting {'read', '(', '+', '-', '!', ID, INT}
     exit_status: :failure
 undefined-variable:
   compile:
     source: |
-      read x;
+      x = read;
       print x;
       print y;
     diagnostics: |
