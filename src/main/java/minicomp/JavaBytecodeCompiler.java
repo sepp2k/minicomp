@@ -211,14 +211,15 @@ public class JavaBytecodeCompiler extends Compiler.Base<Void> {
         visit(loop.start); // Stack = start
         methodWriter.visitInsn(DUP); // start, start
         methodWriter.visitVarInsn(ISTORE, loopVar); // start
+        visit(loop.end); // stop, start
         if (loop.step == null) {
-            methodWriter.visitLdcInsn(1);  // 1, start
+            methodWriter.visitLdcInsn(1);  // 1, stop, start
         } else {
-            visit(loop.step); // inc, start
+            visit(loop.step); // inc, stop, start
         }
-        methodWriter.visitInsn(SWAP); // start, inc
-        visit(loop.end); // stop, start, inc
-        methodWriter.visitInsn(SWAP); // start, stop, inc
+        methodWriter.visitInsn(SWAP); // stop, inc, start
+        methodWriter.visitInsn(DUP2_X1); // stop, inc, start, stop, inc
+        methodWriter.visitInsn(POP2); // start, stop, inc
         methodWriter.visitLabel(condLabel);
         // Entry condition: Stack = index, stop, inc
         methodWriter.visitInsn(SWAP); // stop, index, inc
