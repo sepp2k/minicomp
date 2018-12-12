@@ -1,6 +1,6 @@
 grammar MiniLang;
 
-prog: body=stat* EOF;
+prog: body+=stat* EOF;
 
 stat: 'print' exp ';' # PrintStatement
     | 'if' cond=exp 'then' thenCase+=stat* ('else' elseCase+=stat*)? 'end' # IfStatement

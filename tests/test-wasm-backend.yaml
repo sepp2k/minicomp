@@ -1,0 +1,13 @@
+init: "cd ..; npm run antlr4"
+phases:
+- name: "compile"
+  command: "node ../src/main/js/main.js > \"$tempfileMiniComp.wasm\""
+  input: "source"
+  exit_status: "exit_status"
+  stderr: "diagnostics"
+- name: "run"
+  command: "node ../src/main/js/run-wasm.js \"$tempfileMiniComp.wasm\""
+  input: "input"
+  exit_status: "exit_status"
+  stdout: "stdout"
+  stderr: "stderr"
