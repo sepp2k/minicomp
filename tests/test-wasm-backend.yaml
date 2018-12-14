@@ -1,4 +1,4 @@
-init: "cd ..; npm run antlr4"
+init: "cd .. && npm run antlr4"
 phases:
 - name: "compile"
   command: "node ../src/main/js/main.js > \"$tempfileMiniComp.wasm\""
