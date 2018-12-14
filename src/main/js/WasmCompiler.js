@@ -42,8 +42,16 @@ class WasmCompiler extends MiniLangVisitor {
         return this.nextVariableIndex++;
     }
 
-    error(line, column, message) {
-        this.errors.push("line " + line + ":" + column + " " + message);
+    error(token, message) {
+        // For simplicity we assume that all errors only concern one token as that's all we need
+        // We also assume that tokens can't span multiple lines (which they can't in out language)
+        this.errors.push({
+            line: token.line,
+            startColumn: token.column,
+            endColumn: token.column + token.text.length,
+            message: message,
+            toString: () => "line " + token.line + ":" + token.column + " " + message
+        });
     }
 
     get hasErrors() { return this.errors.length > 0; }
@@ -61,7 +69,7 @@ class WasmCompiler extends MiniLangVisitor {
         parser.removeErrorListeners();
         parser.addErrorListener({
             syntaxError(recognizer, offendingSymbol, line, column, msg) {
-                compiler.error(line, column, msg);
+                compiler.error(offendingSymbol, msg);
             }
         });
         const prog = parser.prog();
@@ -109,7 +117,7 @@ class WasmCompiler extends MiniLangVisitor {
         const name = variable.ID().getText();
         const index = this.variableIndices[name];
         if(index === undefined) {
-            this.error(variable.start.line, variable.start.column, "Undefined variable: " + name);
+            this.error(variable.start, "Undefined variable: " + name);
         }
         return this.module.getLocal(index, Binaryen.i32);
     }

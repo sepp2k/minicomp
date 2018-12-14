@@ -8,7 +8,7 @@ slurpStdin().then( source => {
     const result = WasmCompiler.compile(source);
     if (result.hasErrors) {
         for (const error of result.errors) {
-            console.error(error);
+            console.error(error.toString());
         }
         process.exit(1);
     }
