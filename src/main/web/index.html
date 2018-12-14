@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>MiniLang Compiler</title>
+        <meta charset="utf-8">
+    </head>
+    <body>
+        <textarea id="source">max = read;
+if max &gt;= 0 then
+  print 0;
+end
+prev = 0;
+cur = 1;
+while cur &lt;= max do
+  print cur;
+  tmp = prev;
+  prev = cur;
+  cur = cur + tmp;
+end</textarea><br>
+        <button id="compileButton">Compile</button>
+        <div id="compilationResult" style="display: none;">
+            <pre><code id="assembly" class="language-wasm"></code></pre>
+            <button id="runButton">Run</button>
+            <pre id="output"></pre>
+        </div>
+        <div id="errors"></div>
+    </body>
+    <script src="minicomp.bundle.js"></script>
+</html>

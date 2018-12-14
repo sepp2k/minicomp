@@ -4,14 +4,25 @@
   "private": true,
   "scripts": {
     "antlr4": "antlr4-tool -visitor -o target/generated-sources/antlr4-js src/main/antlr4/minicomp/MiniLang.g4",
-    "start": "npm run antlr4 && node src/main/js/main.js"
+    "build": "npm run antlr4",
+    "build-web": "npm run antlr4 && webpack",
+    "start": "npm run build && node src/main/js/main.js"
   },
   "dependencies": {
     "antlr4": "^4.7.1",
-    "binaryen": "^58.0.0"
+    "binaryen": "^58.0.0",
+    "codemirror": "^5.42.0",
+    "jquery": "^3.3.1",
+    "prismjs": "^1.15.0"
   },
   "devDependencies": {
     "antlr4-tool": "^1.0.26",
-    "jshint": "^2.9.7"
+    "css-loader": "^2.0.0",
+    "file-loader": "^2.0.0",
+    "jshint": "^2.9.7",
+    "style-loader": "^0.23.1",
+    "url-loader": "^1.1.2",
+    "webpack": "^4.27.1",
+    "webpack-cli": "^3.1.2"
   }
 }
