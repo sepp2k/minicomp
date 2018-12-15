@@ -4,9 +4,7 @@
   "private": true,
   "scripts": {
     "antlr4": "antlr4-tool -visitor -o target/generated-sources/antlr4-js src/main/antlr4/minicomp/MiniLang.g4",
-    "build": "npm run antlr4",
-    "build-web": "npm run antlr4 && webpack",
-    "start": "npm run build && node src/main/js/main.js"
+    "webpack": "webpack"
   },
   "dependencies": {
     "antlr4": "^4.7.1",

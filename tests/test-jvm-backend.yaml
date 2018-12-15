@@ -1,4 +1,3 @@
-init: "cd .. && mvn clean package"
 phases:
 - name: "compile"
   command: "java -jar ../target/minicomp-1.0-SNAPSHOT-jar-with-dependencies.jar --jvm > \"$tempdirMiniCompClasses/Main.class\""
