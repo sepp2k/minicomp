@@ -2,6 +2,7 @@ import antlr4
 import byteasm
 import marshal
 import dis
+import importlib
 from MiniLangLexer import MiniLangLexer
 from MiniLangParser import MiniLangParser
 from MiniLangVisitor import MiniLangVisitor
@@ -14,7 +15,7 @@ from MiniLangListener import MiniLangListener
 # is older than the corresponding .py file and needs to be recompiled. Since there is
 # no corresponding .py file in our case, the timestamp does not matter to us and we
 # can just set it to 0.
-PYC_HEADER = b'\x42\x0d\x0d\x0a\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00'
+PYC_HEADER = importlib.util.MAGIC_NUMBER + b'\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00'
 
 class ByteCodeCompiler(MiniLangVisitor):
     operators = {
