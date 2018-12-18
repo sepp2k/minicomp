@@ -5,3 +5,4 @@ node_modules/
 .antlr/
 .classpath
 .project
+__pycache__/

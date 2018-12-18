@@ -1,0 +1,12 @@
+phases:
+- name: "compile"
+  command: "python ../src/main/python/main.py > \"$tempfileMiniComp.pyc\""
+  input: "source"
+  exit_status: "exit_status"
+  stderr: "diagnostics"
+- name: "run"
+  command: "python \"$tempfileMiniComp.pyc\""
+  input: "input"
+  exit_status: "exit_status"
+  stdout: "stdout"
+  stderr: "stderr"
