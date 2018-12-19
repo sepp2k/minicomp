@@ -1,0 +1,114 @@
+nested_for_loops:
+  compile:
+    source: |
+      n = read;
+      m = read;
+      for i = 1 to n do
+        for j = 1 to m do
+          print i+j;
+        end
+      end
+  run:
+    - input: |
+        0
+        42
+      stdout: ""
+    - input: |
+        42
+        0
+      stdout: ""
+    - input: |
+        0
+        0
+      stdout: ""
+    - input: |
+        3
+        3
+      stdout: |
+        2
+        3
+        4
+        3
+        4
+        5
+        4
+        5
+        6
+while_for:
+  compile:
+    source: |
+      n = read;
+      while n do
+        for i = 1 to n do
+          print i;
+        end
+        n = read;
+      end
+  run:
+    - input: |
+        0
+      stdout: ""
+    - input: |
+        3
+        0
+      stdout: |
+        1
+        2
+        3
+    - input: |
+        3
+        2
+        0
+      stdout: |
+        1
+        2
+        3
+        1
+        2
+nested_if:
+  compile:
+    source: |
+      x = read;
+      y = read;
+      if x == 0 then
+        if y == 0 then
+          print 42;
+        else
+          if y == 1 then
+            print 23;
+          end
+        end
+      else
+        if y == 0 then
+          print 13;
+        else
+          if y == 1 then
+            print 7;
+          end
+        end
+      end
+  run:
+    - input: |
+        0
+        4
+      stdout: ""
+    - input: |
+        0
+        0
+      stdout: |
+        42
+    - input: |
+        0
+        1
+      stdout: |
+        23
+    - input: |
+        1
+        0
+      stdout: |
+        13
+    - input: |
+        1
+        1
+      stdout: |
+        7

@@ -53,6 +53,7 @@ class ByteCodeCompiler(MiniLangVisitor):
         self.fb.emit_load_global("print")
         self.visit(stat.exp())
         self.fb.emit_call_function(1)
+        self.fb.emit_pop_top()
 
     def visitIntegerExpression(self, exp):
         self.fb.emit_load_const(int(exp.INT().getText()))
@@ -65,10 +66,9 @@ class ByteCodeCompiler(MiniLangVisitor):
 
     def visitVariableExpression(self, var):
         name = var.ID().getText()
-        if name in self.variables:
-            self.fb.emit_load_fast(name)
-        else:
+        if name not in self.variables:
             self.error(var.start.line, var.start.column, 'Undefined variable: {}'.format(name))
+        self.fb.emit_load_fast(name)
 
     def visitAssignment(self, stat):
         self.visit(stat.exp())
@@ -101,6 +101,78 @@ class ByteCodeCompiler(MiniLangVisitor):
             self.visit(exp.exp())
             self.fb.emit_unary_not()
             self.fb.emit_call_function(1)
+
+    def visitIfStatement(self, exp):
+        end_label = self.fb.make_label()
+        else_label = self.fb.make_label() if exp.elseCase else end_label
+        self.visit(exp.cond)
+        self.fb.emit_pop_jump_if_false(else_label)
+        self.visit_block(exp.thenCase)
+        self.fb.emit_jump_absolute(end_label)
+        if exp.elseCase:
+            self.fb.emit_label(else_label)
+            self.visit_block(exp.elseCase)
+        self.fb.emit_label(end_label)
+
+    def visit_logical_expression(self, exp):
+        self.visit(exp.lhs)
+        end_label = self.fb.make_label()
+        if exp.op.text == '&&':
+            self.fb.emit_jump_if_false_or_pop(end_label)
+        else:
+            self.fb.emit_jump_if_true_or_pop(end_label)
+        self.visit(exp.rhs)
+        self.fb.emit_label(end_label)
+
+    def visitAndExpression(self, exp):
+        self.visit_logical_expression(exp)
+
+    def visitOrExpression(self, exp):
+        self.visit_logical_expression(exp)
+
+    def visit_block(self, block):
+        for statement in block:
+            self.visit(statement)
+
+    def visitWhileLoop(self, loop):
+        cond_label = self.fb.make_label()
+        end_label = self.fb.make_label()
+        self.fb.emit_label(cond_label)
+        self.visit(loop.cond)
+        self.fb.emit_pop_jump_if_false(end_label)
+        self.visit_block(loop.body)
+        self.fb.emit_jump_absolute(cond_label)
+        self.fb.emit_label(end_label)
+
+    def visitForLoop(self, loop):
+        cond_label = self.fb.make_label()
+        end_label = self.fb.make_label()
+        loop_var = loop.ID().getText()
+        self.visit(loop.start)
+        self.fb.emit_store_fast(loop_var)
+        self.visit(loop.end) # Stack = end
+        if loop.step:
+            self.visit(loop.step)
+        else:
+            self.fb.emit_load_const(1)
+        # Stack = step, end
+        self.fb.emit_rot_two() # Stack = end, step
+        self.fb.emit_label(cond_label)
+        self.fb.emit_dup_top() # Stack = end, end, step
+        self.fb.emit_load_fast(loop_var) # Stack = idx, end, end, step
+        self.fb.emit_compare_lt() # Stack = end < idx, end, step
+        self.fb.emit_pop_jump_if_true(end_label) # Stack = end, step
+        self.visit_block(loop.body)
+        self.fb.emit_rot_two() # Stack = step, end
+        self.fb.emit_dup_top() # Stack = step, step, end
+        self.fb.emit_rot_three() # Stack = step, end, step
+        self.fb.emit_load_fast(loop_var) # Stack = idx, step, end, step
+        self.fb.emit_binary_add() # Stack = idx+step, end, step
+        self.fb.emit_store_fast(loop_var) # Stack = end, step
+        self.fb.emit_jump_absolute(cond_label)
+        self.fb.emit_label(end_label)
+        self.fb.emit_pop_top()
+        self.fb.emit_pop_top()
 
 def compile(source: str):
     lexer = MiniLangLexer(source)

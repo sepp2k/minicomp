@@ -117,8 +117,10 @@ undefined-variable:
   compile:
     source: |
       x = read;
-      print x;
-      print y;
+      while x do
+        print x;
+        print y;
+      end
     diagnostics: |
-      line 3:6 Undefined variable: y
+      line 4:8 Undefined variable: y
     exit_status: :failure

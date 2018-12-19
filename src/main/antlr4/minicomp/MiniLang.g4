@@ -17,8 +17,8 @@ exp: ID # VariableExpression
    | lhs=exp op=('*'|'/'|'%') rhs=exp # MultiplicativeExpression
    | lhs=exp op=('+'|'-') rhs=exp # AdditiveExpression
    | lhs=exp op=('=='|'!='|'>'|'>='|'<'|'<=') rhs=exp # Comparison
-   | lhs=exp '&&' rhs=exp # AndExpression
-   | lhs=exp '||' rhs=exp # OrExpression
+   | lhs=exp op='&&' rhs=exp # AndExpression
+   | lhs=exp op='||' rhs=exp # OrExpression
    ;
 
 ID: [a-zA-Z_][a-zA-Z_0-9]*;

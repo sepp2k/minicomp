@@ -19,5 +19,4 @@ if result.errors:
     for error in result.errors:
         print(error, file = sys.stderr)
     sys.exit(2)
-#print(result.generated_text, file = sys.stderr)
 sys.stdout.buffer.write(result.generated_code)
