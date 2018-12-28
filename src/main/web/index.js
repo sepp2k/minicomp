@@ -6,7 +6,7 @@ import CM from 'codemirror';
 import 'codemirror/lib/codemirror.css';
 import 'codemirror/addon/edit/matchbrackets';
 import './minilang-codemirror-mode';
-import WasmCompiler from '../js/WasmCompiler';
+import WasmSyncCompiler from '../js/WasmSyncCompiler';
 import './style.css';
 import './index.html';
 
@@ -44,7 +44,7 @@ $(document).ready(() => {
         clearErrors();
         $('#output').text("");
         const src = editor.getValue();
-        const result = WasmCompiler.compile(src);
+        const result = WasmSyncCompiler.compile(src);
         if (result.hasErrors) {
             $('#compilationResult').css('display', 'none');
             let errorID = 0;

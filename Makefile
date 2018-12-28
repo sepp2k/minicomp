@@ -9,7 +9,7 @@ clean:
 
 java: target/minicomp-1.0-SNAPSHOT-jar-with-dependencies.jar
 
-javascript: node_modules target/generated-sources/antlr4
+javascript: node_modules target/generated-sources/antlr4-js
 
 web: target/web
 
@@ -40,8 +40,13 @@ target/generated-sources/antlr4-py: src/main/antlr4/minicomp/MiniLang.g4
 
 test: javascript-tests java-tests python-tests
 
-javascript-tests: javascript
+javascript-tests: javascript-sync-tests javascript-async-tests
+
+javascript-sync-tests: javascript
 	cli-testrunner tests/test-wasm-backend.yaml
+
+javascript-async-tests: javascript
+	cli-testrunner tests/test-wasm-async-backend.yaml
 
 java-tests: java-llvm-tests java-jvm-tests
 
@@ -63,7 +68,10 @@ run-java-llvm: java
 run-javascript: javascript
 	node src/main/js/main.js
 
+run-javascript-async: javascript
+	node src/main/js/main.js --async
+
 run-python: python
 	${PYTHON} src/main/python/main.py
 
-.PHONY: all clean test javascript web java python javascript-tests java-tests java-llvm-tests java-jvm-tests python-tests run-javascript run-java-jvm run-java-llvm run-python python-packages
+.PHONY: all clean test javascript web java python javascript-tests javascript-sync-tests javascript-async-tests java-tests java-llvm-tests java-jvm-tests python-tests run-javascript run-javascript-async run-java-jvm run-java-llvm run-python python-packages

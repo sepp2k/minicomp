@@ -1,35 +1,14 @@
 'use strict';
 
 const Binaryen = require('binaryen');
-const MiniLangParser = require('../../../target/generated-sources/antlr4-js/MiniLangParser').MiniLangParser;
-const MiniLangLexer = require('../../../target/generated-sources/antlr4-js/MiniLangLexer').MiniLangLexer;
-const MiniLangVisitor = require('../../../target/generated-sources/antlr4-js/MiniLangVisitor').MiniLangVisitor;
-const MiniLangListener = require('../../../target/generated-sources/antlr4-js/MiniLangListener').MiniLangListener;
-const antlr4 = require('antlr4');
+const WasmBaseCompiler = require('./WasmBaseCompiler').WasmBaseCompiler;
 
-const operators = {
-    '+': 'add',
-    '-': 'sub',
-    '*': 'mul',
-    '/': 'div_s',
-    '%': 'rem_s',
-    '==': 'eq',
-    '!=': 'ne',
-    '<': 'lt_s',
-    '<=': 'le_s',
-    '>': 'gt_s',
-    '>=': 'ge_s'
-};
-
-class WasmCompiler extends MiniLangVisitor {
+class WasmSyncCompiler extends WasmBaseCompiler {
     constructor() {
         super();
-        this.errors = [];
-        this.module = new Binaryen.Module();
         this.variableIndices = {};
         this.variableTypes = [];
         this.nextVariableIndex = 0;
-        this.nextLabelIndex = 0;
     }
 
     addVariable(name) {
@@ -42,49 +21,7 @@ class WasmCompiler extends MiniLangVisitor {
         return this.nextVariableIndex++;
     }
 
-    error(token, message) {
-        // For simplicity we assume that all errors only concern one token as that's all we need
-        // We also assume that tokens can't span multiple lines (which they can't in out language)
-        this.errors.push({
-            line: token.line,
-            startColumn: token.column,
-            endColumn: token.column + token.text.length,
-            message: message,
-            toString: () => "line " + token.line + ":" + token.column + " " + message
-        });
-    }
-
-    get hasErrors() { return this.errors.length > 0; }
-
-    freshLabel() {
-        return "l" + this.nextLabelIndex++;
-    }
-
-    static compile(source) {
-        const input = antlr4.CharStreams.fromString(source);
-        const lexer = new MiniLangLexer(input);
-        const tokens = new antlr4.CommonTokenStream(lexer);
-        const parser = new MiniLangParser(tokens);
-        const compiler = new WasmCompiler();
-        parser.removeErrorListeners();
-        parser.addErrorListener({
-            syntaxError(recognizer, offendingSymbol, line, column, msg) {
-                compiler.error(offendingSymbol, msg);
-            }
-        });
-        const prog = parser.prog();
-        if (compiler.hasErrors) return compiler; // Don't try to generate code when there were syntax errors
-        const variableFinder = new MiniLangListener()
-        variableFinder.enterAssignment = (assignment) => compiler.addVariable(assignment.ID().getText());
-        variableFinder.enterForLoop = (loop) => compiler.addVariable(loop.ID().getText());
-        antlr4.tree.ParseTreeWalker.DEFAULT.walk(variableFinder, prog);
-        compiler.visit(prog);
-        return compiler;
-    }
-
-    visitProg(prog) {
-        const printType = this.module.addFunctionType('voidIntFun', Binaryen.void, [Binaryen.i32]);
-        this.module.addFunctionImport("print", "stdlib", "print", printType);
+    createMain(prog) {
         const readType = this.module.addFunctionType('intFun', Binaryen.i32, []);
         this.module.addFunctionImport("read", "stdlib", "read", readType);
 
@@ -93,9 +30,6 @@ class WasmCompiler extends MiniLangVisitor {
         const mainType = this.module.addFunctionType('voidFun', Binaryen.void, []);
         this.module.addFunction("main", mainType, this.variableTypes, body);
         this.module.addFunctionExport("main", "main");
-        this.generatedCode = this.module.emitBinary();
-        this.generatedText = this.module.emitText();
-        this.module.dispose();
     }
 
     visitBlock(statements) {
@@ -109,10 +43,6 @@ class WasmCompiler extends MiniLangVisitor {
         return this.module.setLocal(index, value);
     }
 
-    visitParenthesizedExpression(exp) {
-        return this.visit(exp.exp());
-    }
-
     visitVariableExpression(variable) {
         const name = variable.ID().getText();
         const index = this.variableIndices[name];
@@ -122,10 +52,6 @@ class WasmCompiler extends MiniLangVisitor {
         return this.module.getLocal(index, Binaryen.i32);
     }
 
-    visitIntegerExpression(int) {
-        return this.module.i32.const(parseInt(int.INT().getText()));
-    }
-
     visitPrintStatement(stat) {
         const arg = this.visit(stat.exp());
         return this.module.call("print", [arg], Binaryen.void);
@@ -133,33 +59,6 @@ class WasmCompiler extends MiniLangVisitor {
 
     visitReadExpression() {
         return this.module.call("read", [], Binaryen.i32);
-    }
-
-    visitAdditiveExpression(exp) {
-        return this.binOp(exp.op, exp.lhs, exp.rhs);
-    }
-
-    visitMultiplicativeExpression(exp) {
-        return this.binOp(exp.op, exp.lhs, exp.rhs);
-    }
-
-    visitComparison(exp) {
-        return this.binOp(exp.op, exp.lhs, exp.rhs);
-    }
-
-    binOp(op, lhs, rhs) {
-        lhs = this.visit(lhs);
-        rhs = this.visit(rhs);
-        return this.module.i32[operators[op.text]](lhs, rhs);
-    }
-
-    visitUnaryExpression(exp) {
-        const arg = this.visit(exp.exp());
-        switch(exp.op.text) {
-            case '+': return arg;
-            case '-': return this.module.i32.sub(this.module.i32.const(0), arg);
-            case '!': return this.module.i32.eq(this.module.i32.const(0), arg);
-        }
     }
 
     visitIfStatement(stat) {
@@ -195,7 +94,7 @@ class WasmCompiler extends MiniLangVisitor {
     visitLoop(cond, body) {
         const loopLabel = this.freshLabel();
         const endLabel = this.freshLabel();
-        const exitCondition = this.module.i32.eq(this.module.i32.const(0), cond);
+        const exitCondition = this.not(cond);
         return this.module.loop(loopLabel, this.module.block(endLabel, [
             this.module.br_if(endLabel, exitCondition),
             body,
@@ -232,4 +131,4 @@ class WasmCompiler extends MiniLangVisitor {
     }
 }
 
-exports.compile = (source) => WasmCompiler.compile(source);
+exports.compile = (source) => WasmSyncCompiler.compile(source);

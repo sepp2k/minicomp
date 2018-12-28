@@ -34,6 +34,39 @@ nested_for_loops:
         4
         5
         6
+nested_while_loops:
+  compile:
+    source: |
+      n = read;
+      while n do
+        i = 1;
+        while i <= n do
+          print i;
+          i = i + 1;
+        end
+        n = read;
+      end
+  run:
+    - input: |
+        0
+      stdout: ""
+    - input: |
+        3
+        0
+      stdout: |
+        1
+        2
+        3
+    - input: |
+        3
+        2
+        0
+      stdout: |
+        1
+        2
+        3
+        1
+        2
 while_for:
   compile:
     source: |
