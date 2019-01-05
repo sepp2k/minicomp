@@ -2,7 +2,7 @@ import antlr4
 import byteasm
 import marshal
 import dis
-import importlib
+import importlib.util
 from MiniLangLexer import MiniLangLexer
 from MiniLangParser import MiniLangParser
 from MiniLangVisitor import MiniLangVisitor
