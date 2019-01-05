@@ -50,10 +50,10 @@ javascript-async-tests: javascript
 
 java-tests: java-llvm-tests java-jvm-tests
 
-java-llvm-tests:
+java-llvm-tests: java
 	cli-testrunner tests/test-llvm-backend.yaml
 
-java-jvm-tests:
+java-jvm-tests: java
 	cli-testrunner tests/test-jvm-backend.yaml
 
 python-tests: python
