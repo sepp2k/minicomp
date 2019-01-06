@@ -193,3 +193,17 @@ side-effects-in-loop-bounds:
       23
       30
       37
+side-effects-in-while-condition:
+  compile:
+    source: |
+      while read do
+        print 42;
+      end
+  run:
+    input: |
+      23
+      42
+      0
+    stdout: |
+      42
+      42

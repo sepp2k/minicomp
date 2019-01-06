@@ -156,13 +156,14 @@ class WasmAsyncCompiler extends WasmBaseCompiler {
         return this.visitLogicalExpression(exp, false);
     }
 
-    visitLoop(cond, body) {
+    visitLoop(generateCond, generateBody) {
         this.newBlock();
-        const exitCondition = this.not(cond());
-        const condBlock = this.currentBlock;
         const condBlockIndex = this.currentBlockIndex;
+        const cond = generateCond();
+        const exitCondition = this.not(cond);
+        const condBlock = this.currentBlock;
         this.newBlock();
-        body();
+        generateBody();
         this.generateBranch(this.currentBlock, condBlockIndex);
         this.newBlock();
         this.generateBranch(condBlock, this.currentBlockIndex, exitCondition);
@@ -192,7 +193,7 @@ class WasmAsyncCompiler extends WasmBaseCompiler {
         const body = () => {
             this.visitBlock(loop.body);
             this.currentBlock.push(this.module.setGlobal(loopVariable, this.module.i32.add(readLoopVariable, readStepVariable)));
-        }
+        };
         this.visitLoop(() => cond, body);
     }
 }

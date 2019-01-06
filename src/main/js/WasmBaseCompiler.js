@@ -65,7 +65,7 @@ class WasmBaseCompiler extends MiniLangVisitor {
         });
         const prog = parser.prog();
         if (compiler.hasErrors) return compiler; // Don't try to generate code when there were syntax errors
-        const variableFinder = new MiniLangListener()
+        const variableFinder = new MiniLangListener();
         variableFinder.enterAssignment = (assignment) => compiler.addVariable(assignment.ID().getText());
         variableFinder.enterForLoop = (loop) => compiler.addVariable(loop.ID().getText());
         antlr4.tree.ParseTreeWalker.DEFAULT.walk(variableFinder, prog);
