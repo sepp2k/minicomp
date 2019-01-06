@@ -17,11 +17,13 @@ while cur &lt;= max do
   prev = cur;
   cur = cur + tmp;
 end</textarea><br>
-        <button id="compileButton">Compile</button>
+        <button id="compileSyncButton">Compile to synchronous WASM</button>
+        <button id="compileAsyncButton">Compile to asynchronous WASM</button>
         <div id="compilationResult" style="display: none;">
             <pre><code id="assembly" class="language-wasm"></code></pre>
             <button id="runButton">Run</button>
             <pre id="output"></pre>
+            <div id="input" style="display: none"><input type="number" value="0"><button>Send</button></div>
         </div>
         <div id="errors"></div>
     </body>
